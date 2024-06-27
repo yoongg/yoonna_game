@@ -40,6 +40,7 @@ const ground=Bodies.rectangle(310,820,620,60,{
     render : {fillStyle:'#E6B143'} // 생상 지정
 })
 const topLine=Bodies.rectangle(310,150,620,2,{
+    name: "topLine",
     isStatic: true, // 고정해주는 기능
     isSensor: true, // 충돌은 감자하나, 물리엔진은 적용 안함
     render : {fillStyle:'#E6B143'} // 생상 지정
@@ -81,32 +82,34 @@ function addFruit(){
 }
 window.onkeydown=(event) =>{
     // 제어 조작 변수가 true면 바로 티턴
-    if(disableAction){
+    if (disableAction) {
         return;
     }
-    switch(event.code){
+    switch (event.code) {
         case "KeyA":
-            Body.setPosition(currentBody,{
-                x:currentBody.position.x-10,
-                y: currentBody.position.y
-            })
+            if (currentBody.position.x - curttentFruit.radius > 30)
+                Body.setPosition(currentBody, {
+                    x: currentBody.position.x - 10,
+                    y: currentBody.position.y
+                })
             break;
         case "KeyD":
-            Body.setPosition(currentBody,{
-                x:currentBody.position.x+10,
-                y: currentBody.position.y
-            })
+            if (currentBody.position.x + curttentFruit.radius < 570)
+                Body.setPosition(currentBody, {
+                    x: currentBody.position.x + 10,
+                    y: currentBody.position.y
+                })
             break;
         case "KeyS":
-            currentBody.isSleeping=false;
+            currentBody.isSleeping = false;
 
-            disableAction=true
+            disableAction = true
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 addFruit();
-                disableAction=false;
-            },1000)
-            
+                disableAction = false;
+            }, 1000)
+
             break;
     }
 }
@@ -117,6 +120,11 @@ Events.on(engine,"collisionStart", (event)=> {
         
             // 기존 과일의 index를 저장
             const index = collision.bodyA.index;
+            
+            // 수박일 경우 처리 안함
+            if(index=FRUITS.length-1){
+                return;
+            }
 
             // 충돌이 일어나는 같은 과일 제거
             World.remove(world, [collision.bodyA, collision.bodyB]);
@@ -137,7 +145,14 @@ Events.on(engine,"collisionStart", (event)=> {
             );
 
             World.add(world, newBody);
-        } 
+
+        }
+        if(!disableAction && (collision.bodyA.name==="topLine"||collision.bodyB==="topLine")){
+            alert("Game Over") 
+            disableAction=true
+        }
+                
+
     });
 });
 
